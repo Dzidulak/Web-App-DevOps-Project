@@ -46,7 +46,7 @@ class Order(Base):
     product_quantity = Column('Product Quantity', Integer)
     order_date = Column('Order Date', DateTime)
     shipping_date = Column('Shipping Date', DateTime)
-    delivery_date = Column('Delivery Date', DateTime)  # Add this line
+    delivery_date = Column('Delivery Date', DateTime)  #New delvery date column added to page.
 
 # define routes
 # route to display orders
@@ -86,7 +86,7 @@ def add_order():
     product_quantity = request.form.get('product_quantity')
     order_date = request.form.get('order_date')
     shipping_date = request.form.get('shipping_date')
-    delivery_date = request.form['delivery_date']  # Add this line
+    delivery_date = request.form['delivery_date']  # route for new delivery date column
     
     # Create a session to interact with the database
     session = Session()
@@ -101,7 +101,7 @@ def add_order():
         product_quantity=product_quantity,
         order_date=order_date,
         shipping_date=shipping_date,
-        delivery_date=delivery_date # Add this line
+        delivery_date=delivery_date # adding new delvery date coulmn to order object.
     )
 
     # Add the new order to the session and commit to the database
