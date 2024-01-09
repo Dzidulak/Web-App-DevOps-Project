@@ -87,6 +87,7 @@ def add_order():
     order_date = request.form.get('order_date')
     shipping_date = request.form.get('shipping_date')
     delivery_date = request.form['delivery_date']  # route for new delivery date column
+
     
     # Create a session to interact with the database
     session = Session()
