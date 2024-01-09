@@ -26,6 +26,12 @@ Welcome to the Web App DevOps Project repo! This application allows you to effic
 
 - **Data Validation:** Ensure data accuracy and completeness with required fields, date restrictions, and card number validation.
 
+## Developments
+#### Milestone 1
+(Reverted New Feature)
+
+Added a new column to the order list page that displays the delivery date for each order. By adding this new column a new field in the add order page was added so the the user can add the delivery date the the order.
+
 ## Getting Started
 
 ### Prerequisites
@@ -56,6 +62,7 @@ To run the application, you simply need to run the `app.py` script in this repos
 ## Contributors 
 
 - [Maya Iuga]([https://github.com/yourusername](https://github.com/maya-a-iuga))
+
 
 ## License
 
