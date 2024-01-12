@@ -26,11 +26,139 @@ Welcome to the Web App DevOps Project repo! This application allows you to effic
 
 - **Data Validation:** Ensure data accuracy and completeness with required fields, date restrictions, and card number validation.
 
+## Developments
+
+### Milestone 1
+
+#### *Reverted* New Feature (In feature/add-delivery-date branch)
+
+Added a new column to the order list page that displays the delivery date for each order. By adding this new column a new field in the add order page was added so the the user can add the delivery date the the order.
+This feature was updated within the app.py and templates/orders.html files. 
+
+### Milestone 2
+
+#### Containerizing the Web Application
+
+*Creating Dockerfile*
+
+There were 7 steps undertaken to to create this Dockerfile. They were:
+1. Creating a file called ```Dockerfile```.
+2. Setting the parent image. In this case as the application is using flask the parent/base image is an official Python runtime (python:3.8-slim) using the ```FROM``` command.
+3. Setting the working directory using the ```WORKDIR``` command.
+4. Copying the application files into the container's working directory set in step using the ```COPY``` command. 
+5. Installing dependencies for the container. Using the ```RUN``` command and installing the system dependencies, ODBC driver (for azure sql database), pip, setuptools and the dependencies in the requirements file.
+6. Using ```EXPOSE``` command to expose port 5000 as this is the port the Flask app is on. 
+7. Setting start up command using ```CMD``` command which will run the application by running app.py file when the container starts running. 
+
+*Building Docker Image*
+
+This saved Docker file is then used to build a docker image using the command ```docker build -t webapp-devops-project```
+
+To check the containerized application is working, it was run locally using the command: ```docker run -p 5000:5000 webapp-devops-project```
+
+With the image running locally it is fine then tag and push the image to Docker Hub. 
+This is done using the command: 
+
+```docker tag webapp-devops-project dzidulak/webapp-devops-project:latest``` to tag the image and use  ```docker push``` to push the image to Docker Hub.  
+
+*Docker Image details*
+
+This Docker Image is available on Docker Hub. It's called ```dzidulak/webapp-devops-project``` and has the "latest" tag.
+
+The image can be used by using the command: ```docker pull dzidulak/webapp-devops-project:latest```
+
+### Milestone 3
+
+#### Defining Networking Services with IaaC(Terraform)
+
+This is the first step of setting up a an Azure Kubernetes Service (AKS) cluster using IaaC(Terraform).
+
+I started off by creating different directory which will be used to create each module for the terraform project. The base folder was called ```aks-terraform``` and there were 2 modules within this directory called ```aks-cluster-module``` and ```networking-module```.
+
+The section focusses on the networking module. To start off 3 files are created:
+
+- ```main.tf``` - Held the information holding all he created resources
+- ```variables.tf``` - Held the input variables
+- ```outputs.tf``` - Held all the output variables
+
+#### *Setting input variables*
+
+3 input variables were set in the variables file. These are variables that were used throughout this module. These variables were:
+- ```resource_group_name``` - Name of the Azure Resource Group where the networking resources will be deployed in.
+- ```location``` - The Azure region where the networking resources will be deployed to.
+- ```vnet_address_space``` - The address space for the Virtual Network (VNet).
+
+#### *Setting main file* 
+
+The resources created in the file were:
+- ```azurerm_resource_group```  - The Azure Resource Group.
+- ``azurerm_virtual_network`` - The Azure Virtual Network(VNet).
+- ``azurerm_subnet`` - subdivision of a Virtual Network and is used to group resources logically
+    
+    There were 2 subnets created:
+    - `control_plane_subnet`
+    - `worker_node_subnet`
+
+- `network_security_group`(NSG) - Controls network traffic to and from Azure resources.
+- `network_security_rule` - Rules used within the NSG to control traffic
+
+    2 rules were created:
+    - `kube-apiserver-rule` - This allows traffic to the kube-apiserver from my public IP using port 443.
+    - `ssh` - allow inbound SSH traffic from my public IP using port 22.
+
+#### *Setting outputs variables* 
+
+5 output variables were set in the output variables file. These are variables that are used in other modules. These variables were:
+
+- `vnet_id` - The ID of the created VNet.
+- `control_plane_subnet_id` - The ID of the control plane subnet within the VNet.
+- `worker_node_subnet_id` - The ID of the worker node subnet within the VNet.
+- `networking_resource_group_name` -Name of the networking resources' resource group.
+- `aks_nsg_id` - the ID of the Network Security Group (NSG).
+
+### Milestone 4
+
+#### Defining AKS cluster in Terraform
+
+The AKS cluster was defined in the ```aks-cluster-module``` directory and just like to the networking module three files were created.
+The input variables, output variables and the main configuration. 
+
+#### *Setting input variables*
+
+The input variables used in this module are:
+
+- ``aks_cluster_name`` - Represents the name of the AKS cluster you wish to create.
+- ``cluster_location`` - Specifies the Azure region where the AKS cluster will be deployed to.
+- ``dns_prefix`` - Defines the DNS prefix of cluster.
+- ``kubernetes_version`` - Specifies which Kubernetes version the cluster will use.
+- ``service_principal_client_id`` - Provides the Client ID for the service principal associated with the cluster.
+- ``service_principal_secret`` - Supplies the Client Secret for the service principal.
+
+Additionally I added the *output variables* from the *networking module*. This is due to the fact that the networking module establishes 
+the networking resources for the AKS cluster.
+
+#### *Setting main file* 
+
+The only resource defined in the main file configuration file is the AKS cluster (``azurerm_kubernetes_cluster``) which was defined with the variables.
+Within the aks cluster resource definition the following were defined:
+
+- ``default_node_pool`` - Defines the default node pool for the cluster.
+- ``service_principal`` - Provides the authentication details for the AKS cluster
+
+#### *Setting outputs variables* 
+
+5 output variables were set in the output variables file. These variables were:
+
+- ``aks_cluster_name`` - Name of the AKS cluster.
+- ``aks_cluster_id`` - ID of the AKS cluster.
+- ``aks_kubeconfig`` - Kubeconfig file for interacting with and managing the AKS cluster using kubectl.
+
+
 ## Getting Started
 
 ### Prerequisites
 
-For the application to succesfully run, you need to install the following packages:
+For the application to successfully run, you need to install the following packages:
 
 - flask (version 2.2.2)
 - pyodbc (version 4.0.39)
