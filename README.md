@@ -153,6 +153,58 @@ Within the aks cluster resource definition the following were defined:
 - ``aks_cluster_id`` - ID of the AKS cluster.
 - ``aks_kubeconfig`` - Kubeconfig file for interacting with and managing the AKS cluster using kubectl.
 
+### Milestone 5
+
+
+#### Defining main configuration & Creating a AKS cluster with terraform. 
+
+The main configuration was created in the ``aks-terraform`` directory.
+
+#### *Setting input variables*
+
+##### Getting credentials
+
+In the main configuration 4 azure account details are need:``client_id``, ``client_secret``, ``subscription_id`` and ``tenant_id``.
+These credentials are obtained through the Azure CLI. First I obtained the the subscription ID and this is obtained by to login to Azure CLI using 
+```
+az login
+``` 
+then using the 
+```
+az account list --output table
+``` 
+which will show the subscription ID. 
+
+The next step was to create a service principal which is an identity that helps apps/automated solutions like this to interact with azure resources. To create a service principal the following command is used:
+
+```
+az ad sp create-for-rbac --name {service-principal-name} --role contributor --scopes subscriptions/{your-subscription-id}
+```
+
+Where ``{service-principal-name}`` is the name chosen for the service principal and ``{your-subscription-id}``. This command will create the service principal and will reveal the ``client_id``, ``client_secret``, ``subscription_id`` and ``tenant_id`` in a JSON in the CLI.
+
+As the ``client_id`` and ``client_secret`` are sensitive data they were set as environment variables  
+
+##### Input variable definition
+
+Only the the the ``client_id`` and ``client_secret`` were defined in the input variables and "sensitive" field was set to "true" for both variables. 
+
+#### *Setting main configuration*
+- provider
+
+The first step in the main configuration file is to set the providers fields. The first terraform field sets the configuration to *"azurerm"* which is used for Azure resources. Then set the provider which is where the service principal details obtained above are defined.
+
+Next is setting up the 2 modules that have already been defined (the networking module & aks the cluster module) both modules were set up using the syntax below:
+```
+module "<module-name>" {
+  source = "<directory-of-module>"
+
+  # Input variables for the networking module
+  ...
+  ...
+}
+```
+As shown above the module requires the source of the module defined, then the input variable for those modules defined. 
 
 ## Getting Started
 
