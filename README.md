@@ -206,6 +206,64 @@ module "<module-name>" {
 ```
 As shown above the module requires the source of the module defined, then the input variable for those modules defined. 
 
+##### accessing aks cluster.
+After deploying the aks cluster, To access it you can use the command below which will fetch the kubeconfig and automatically merge it into your local ~/.kube/config file, which is the default location for kubeconfig. 
+```
+az aks get-credentials --resource-group <your-resource-group> --name <your-aks-cluster-name>
+```
+This will allow you to interact with the aks cluster using kubectl commands. 
+
+### Milestone 6 
+### Kubernetes Deployment to AKS 
+
+In this section I create a kubernetes manifest file. This file describes the desired state of the the kubernetes object. 
+To start a yaml file named ``application-manifest.yaml``. This file holds the information of how I desire my kubernetes object to look and therefore holds the information for the deployment and the service. 
+The normal syntax for files are as shown below
+```
+apiVersion: ..
+kind: ...
+metadata:
+  ...
+spec:
+  ...
+```
+
+#### Deployment
+
+To start ``apiVersion:``  was set to app/v1 which just shows this as the first version of the deployment. Then to specify that I'm defining a deployment, I make sure the ``kind`` field is set to *"Deployment"*. Then within the ``metadata`` fields i name the deployment "flask-app-deployment" and this acts as a central reference for managing the containerized application. 
+The ``spec:`` field holds teh rest of the design of the deployment and the following setting are defined in this field:
+- ``replicas: 2`` - This specifies that the application should concurrently run on two replicas within the AKS cluster, allowing for scalability and high availability.
+- Adding a ``selector`` field and using the ``matchLables`` section I defined the app the with label ``app: flask-devops-webapp`` which is used as a unique identifier and allows Kubernetes to identify which pods the Deployment should manage.
+- This label is also used in the next metadata section within the template field (pod template) and this is is used to mark the pods created by the Deployment, establishing a clear connection between the pods and the application being managed.
+- Defining the container being used. I simply defined the docker image that is holding the application which is on Docker Hub and exposing port 5000 for communication within the AKS cluster.
+- The final step was setting the deployment strategy. The chosen strategy was Rolling Updates which facilitating seamless application updates and makes minimizes downtime for users.
+
+#### Service
+
+With the deployment manifest configured, I configured the service manifest in the same file facilitate internal communication within the AKS cluster using the ``---`` command.
+The steps taken to configure this were:
+- Specifying the ``kind:`` as *"Service"* and naming the service "flask-app-service".
+- The selector label is set to the same label used in the deployment manifest ("flask-devops-webapp") which guarantees that the traffic is efficiently directed to the appropriate pods, maintaining seamless internal communication within the AKS cluster.
+- Configured the service to use the TCP protocol on port 80 for internal communications and the ``targetPort`` is set to 5000 which is the same as the port exposed by the container in the deployment manifest. 
+- Finally, I set the service type to "ClusterIP", designating it as an internal service within the AKS cluster. 
+
+#### Testing & Validation
+
+This application is an internal tool designed for the company's employees and is not intended for external users and given its internal nature, I assessed the now deployed deployment by performing port forwarding to a local machine using the ```kubectl port-forward <pod-name> 5000:5000``` command. 
+
+To test and validate the application I accessed the application locally using the the url: ``http://127.0.0.1:5000`` and I checked every feature of the application and made sure it was everything was working as expected. The features tested were:
+- The order list is displaying the information as expected on each page.
+- Switching between the order list and the add order page making sure that there are no problems there. 
+- Adding order through the add order page and making sure they are shown on the order list page. 
+- Adding different values to make sure invalid details are not inputted.
+
+#### Possible distribution plans
+
+There may be point were the team members/internal company users will want access to the application. In this case I would probably use a change the service manifest to use a *"load balancer"* which provide an efficient way to distribute incoming requests across the nodes in the Kubernetes cluster. By giving the team members and other internal company members the ip address & port to the application they can easily access the application using a web browser. This also skips the hassle of port forwarding for others. 
+
+In a time where I would want to share the application to external users it would be better to use an Ingress using HTTPS in the service manifest as this would be better for handling external web traffic and will be more secure. 
+
+
 ## Getting Started
 
 ### Prerequisites
