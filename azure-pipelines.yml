@@ -18,3 +18,11 @@ steps:
     command: 'buildAndPush'
     Dockerfile: '**/Dockerfile'
     tags: 'latest'
+- task: KubernetesManifest@1
+  inputs:
+    action: 'deploy'
+    connectionType: 'azureResourceManager'
+    azureSubscriptionConnection: 'Dzidula Keteku DevOps(bda15cf0-ee8f-4056-ac89-0175328c5ee9)'
+    azureResourceGroup: 'networking-rg'
+    kubernetesCluster: 'terraform-aks-cluster'
+    manifests: 'application-manifest.yaml'
