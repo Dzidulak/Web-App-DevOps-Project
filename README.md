@@ -263,6 +263,60 @@ There may be point were the team members/internal company users will want access
 
 In a time where I would want to share the application to external users it would be better to use an Ingress using HTTPS in the service manifest as this would be better for handling external web traffic and will be more secure. 
 
+### Milestone 6 
+### CI/CD Pipeline with Azure DevOps
+
+The first step to create a CI/CD pipeline in Azure DevOps is creating a project within Azure DevOps. 
+And then within the "pipelines" tab after the project is created create a "new pipeline" using GitHub as the source control system where your application code is hosted. 
+After configuring the git hub connection I chose this github repo which holds all the source code and other vital documents that will be used for the pipeline's automation. 
+
+#### Azure pipeline file
+
+After choosing the repository it was time to start the creation of the pipeline .yml file. In Azure Devops there are templates that can be used to start the pipeline build. I used the Starter pipeline template to start and edited it to my liking. 
+
+#### Build pipeline creation 
+
+Before editing anything I needed to create a service connection between Azure DevOps and my Docker Hub account which holds the application image. 
+This allows for seamless integration of the CI/CD pipeline with the Docker Hub container registry. 
+
+This was done by creating the access token on Docker Hub and then on Azure Devops add a new "Docker Registry" service connection using the my docker hub username and the created access token. 
+Now that the service connection is created, the build pipeline can create the docker image and push the image to Docker Hub seamlessly. 
+
+Now back in the azure-pipeline.yml file, I added a task in the steps field to build and push the application to Docker Hub. This is easy to do using the add task feature in Azure Devops and this helps tyo add the following code to the file.
+```
+- task: Docker@2
+  inputs:
+    containerRegistry: 'Docker Hub'
+    repository: 'dzidulak/webapp-devops-project'
+    command: 'buildAndPush'
+    Dockerfile: '**/Dockerfile'
+    tags: 'latest'
+```
+And this code basically uses the "buildAndPush" command to build and push a docker image, from the Dockerfile at the directory supplies in the repository used in for the pipeline, to Github.  
+
+To check this was created fine, I saved and ran the pipeline. After seeing that it ran smoothly, I checked Docker Hub to see when the last push was made. 
+
+#### Release pipeline creation 
+
+Now that the build pipeline is sorted, its time to create the release pipeline. 
+
+A service connection is also needed for the release pipeline to help establish a secure link between the CI/CD pipeline and the AKS cluster. This will enable seamless deployments and effective management. 
+The Kubernetes service connection was created in a settings using my azure subscription as it is an AKS cluster. 
+
+With with the service connection set, I then went back into the pipeline.yaml file to configure the release pipeline by adding "Deploy to Kubernetes" task to deploy the application onto the aks cluster. I then added the following task:
+```
+- task: KubernetesManifest@1
+  inputs:
+    action: 'deploy'
+    connectionType: 'azureResourceManager'
+    azureSubscriptionConnection: <my-azure-subscription>
+    azureResourceGroup: 'networking-rg'
+    kubernetesCluster: 'terraform-aks-cluster'
+    manifests: 'application-manifest.yaml'
+```
+This task deploys the application from the application manifest file in the repository to my aks cluster with the name of the cluster and the resource group specified. The connection type is also "azureResourceManager" as an aks cluster is a azure resource. 
+
+With the release pipeline configured, I saved and ran this file to perform the full pipeline. So it builds and pushes the docker image and then deploys the application onto the aks cluster earlier created. To check that this deployment was successful I checked the aks cluster to see the if the pods have been created. Then I used port forwarding to access the application locally and test the application's functionality. 
 
 ## Getting Started
 

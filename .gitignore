@@ -1,6 +1,7 @@
 *.terraform/*
 *.terraform*
 *.tfstate
+*.tfstate.backup
 
 *.env
 *.zshrc
