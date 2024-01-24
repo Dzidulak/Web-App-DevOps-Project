@@ -318,6 +318,88 @@ This task deploys the application from the application manifest file in the repo
 
 With the release pipeline configured, I saved and ran this file to perform the full pipeline. So it builds and pushes the docker image and then deploys the application onto the aks cluster earlier created. To check that this deployment was successful I checked the aks cluster to see the if the pods have been created. Then I used port forwarding to access the application locally and test the application's functionality. 
 
+### Milestone 7
+### AKS Cluster Monitoring 
+
+Monitoring the aks cluster is essential as it allows for me to identify and address issues in real time, optimizing resource usage and making data-driven decisions. 
+
+The first step before anything was to enable container insights which is a  tool for collecting real-time in-depth performance and diagnostic data anf this will allow me to efficiently monitor the application performance and troubleshoot issues. This was done in the insights section under monitoring in the aks cluster being monitored in the Azure portal. 
+
+#### Metrics Explorer charts
+
+Metrics explorer charts help visually track different aspects of the aks cluster. These were created in metrics page under the monitoring in the aks cluster.
+The charts created by making sure the scope was the name of the aks cluster, the aggregation is average and the following metrics:
+
+- Average Node CPU Usage - Shows the CPU usage of your AKS cluster's nodes which helps ensure efficient resource allocation and detect potential performance issues.
+  - Below is a screenshot of the chart. The CPU usage percentage is on y axis and the time (using 24hr clock) is shown on the x axis. It shows that only 8% of the nodes cpu is being used.
+  ![Average Node CPU Usage Screenshot](screenshots/Average%20Node%20CPU%20Usage.png)
+
+- Average Pod Count - Shows the average number of pods running in your AKS cluster which is key for evaluating the cluster's capacity and workload distribution.
+  - Below is a screenshot of the chart. The number of pods running is ready state are on y axis and the time (using 24hr clock) is shown on the x axis. It shows that only 16 pods were in ready state.
+  ![Average Pod Count Screenshot](screenshots/Average%20Pod%20Count.png)
+
+- Used Disk Percentage - Shows how much disk space is being utilized which is critical to prevent storage-related issues.
+  - Below is a screenshot of the chart. The used disk space percentage is on y axis and the time (using 24hr clock) is shown on the x axis. It shows that only 8% of the disk space is being used. 
+  ![Used Dis Percentage Screenshot](screenshots/Used%20Disk%20Percentage.png)
+
+- Bytes Read and Written per Second - Provides insights into data transfer rates which helps identify potential performance bottlenecks. 
+  - This chart was created by adding two metics (Avg Bytes Read per Second & Avg Bytes Written per Second) together on one chart using the add metrics feature found at the top of the metics page. 
+  - Below is a screenshot of the chart.The average bytes written/read per second are on y axis and the time (using 24hr clock) is shown on the x axis. It shows that only 16 pods were currently 
+  ![Bytes Read and Written per Second Screenshot](screenshots/Bytes%20Read%20and%20Written%20per%20Second.png)
+
+#### Log Analytics
+
+Log Analytics is query based tool that help produce different insights into different aspects of the aks cluster.
+The Log Analytics is found in the logs section under monitoring in the aks cluster on the Azure portal.
+It uses Kusto Query Language (KQL) with some pre-made queries for different insights for the aks cluster and these queries can also edited in the query window. 
+
+For this aks cluster I performed and saved 5 queries to analyse  and they were: 
+- Average Node CPU Usage Percentage per Minute - This captures data on node-level usage at a granular level, with logs recorded per minute which helps detect performance concerns and efficiently allocate resources.  
+  - This was a pre-built query found in the "alerts" section and it produced the following results:
+  ![Average Node CPU Usage Percentage per Minute Screenshot](screenshots/Screenshot%202024-01-24%20165606.png)
+  - Each row in the results represents the average node CPU usage within one-minute.
+
+- Average Node Memory Usage Percentage per Minute - This, similarly to the CPU usage percentage, helps track memory usage at node level helping detect memory-related performance concerns and efficiently allocate resources 
+  - This was a pre-built query found in the "alerts" section and it produced the following results:
+  ![Average Node Memory Usage Percentage per Minute Screenshot](screenshots/Screenshot%202024-01-24%20165717.png)
+  - Each row in the results represents the average node memory usage within one-minute.
+
+- Pods Counts with Phase - This the count of pods with different phases which offers insights into pod lifecycle and helps ensure the cluster's workload is appropriately distributed.
+  - This was a pre-built query found in the "availability" section and it produced the following results:
+  ![Pods Counts with Phase Screenshot](screenshots/Screenshot%202024-01-24%20172107.png)
+  - Each row in the results represents the number of pods in various phases within one-minute.
+
+- Find Warning Value in Container Logs - This helps detect issues or errors within the containers, allowing for prompt troubleshooting and issues resolution. 
+  - I edited the pre-built query "Find a value in Container Logs Table" under the "Container" by assigning "warning" to the FindString variable. 
+  - When I ran this query no warning were found. 
+  - But in the case of were warnings are found, each row in the result section represents an instance where the specific keyword was found in the container logs.
+
+- Monitoring Kubernetes Events - This helps track events like pod scheduling, scaling activities, and errors, which is essential for tracking the overall health and stability of the cluster. 
+  - When I ran this query no events were found. 
+  - In the case where events are found, each row in the result section represents an instance where specific Kubernetes events were found in the container logs. 
+
+#### Configuring the alarms
+
+Setting alarms help detect and address issues promptly, reducing the risk of disruptions and optimizing the performance of your applications.
+
+The alarm setup is found in the alerts section under monitoring. And all the alarms are found in the alert rules tag on the top ribbon. 
+I created a new alert rule for the "Disk Used Percentage". The specific configurations were:
+  - Signal name = Disk Used Percentage 
+  - Threshold value = 90% - If the disk usd percentage passes 90% an alert will bve sent. 
+  - Check every = 5 min - How often the condition should be checked. 
+  - Loopback period = 15 min - How far back the rule should look when evaluating alert conditions.
+
+Then I created an Action group which is collections of notification preferences and actions that can be bundled together to form a comprehensive response to an alert. This was used to specify how the alert is sent. 
+This was created by naming the action group and choosing it's resource group, subscription and region. Then I specified the notification type to be Email/SMS messages/Push/Voice as I wanted the alerts to come by email so I highlighted email field and typed in my email and saving that action group and the alarm. 
+
+I also edited the preset alerts (CPU usage and memory working set percentage alerts) to have threshold value to be 80% and be in the same action group as the disk used percentage rule.  
+
+####  Responding to the alarms
+
+When it comes to responding to these alerts, I would first look at at my resources to see if there are any un used recourses that are not being used and try to clear up space. 
+If this does help, I would have to scale up the infrastructure with more replicas a or adding more memory to the infrastructure. 
+
+
 ## Getting Started
 
 ### Prerequisites
