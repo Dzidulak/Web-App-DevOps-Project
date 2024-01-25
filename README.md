@@ -7,8 +7,11 @@ Welcome to the Web App DevOps Project repo! This application allows you to effic
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Technology Stack](#technology-stack)
+- [Developments](#developments)
+- [Project architecture diagram](#project-architecture-diagram)
 - [Contributors](#contributors)
 - [License](#license)
+
 
 ## Features
 
@@ -54,6 +57,8 @@ To run the application, you simply need to run the `app.py` script in this repos
 - **Database:** The application employs an Azure SQL Database as its database system to store order-related data.
 
 ## Developments
+
+The following milestones show how I created an end-to-end devops pipeline for this application. 
 
 ### Milestone 1
 
@@ -478,10 +483,11 @@ I then accessed the value of each secret using the following code:
 ```
 secret = secret_client.get_secret("secret-name").value
 ```
-Where "secret-name" is the name of secret in the key vault. 
+Where "secret-name" is the name of secret in the key vault. This will alow the code to use the values form the key vault to log into the database.
 
 ## Project architecture diagram
 
+This diagram shows the structure of the whole project
 ![Project architecture diagram Screenshot](screenshots/UML%20diagram%20for%20the%20architecture.png)
 
 ## Contributors 
