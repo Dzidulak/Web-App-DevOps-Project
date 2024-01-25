@@ -263,7 +263,7 @@ There may be point were the team members/internal company users will want access
 
 In a time where I would want to share the application to external users it would be better to use an Ingress using HTTPS in the service manifest as this would be better for handling external web traffic and will be more secure. 
 
-### Milestone 6 
+### Milestone 7 
 ### CI/CD Pipeline with Azure DevOps
 
 The first step to create a CI/CD pipeline in Azure DevOps is creating a project within Azure DevOps. 
@@ -318,7 +318,7 @@ This task deploys the application from the application manifest file in the repo
 
 With the release pipeline configured, I saved and ran this file to perform the full pipeline. So it builds and pushes the docker image and then deploys the application onto the aks cluster earlier created. To check that this deployment was successful I checked the aks cluster to see the if the pods have been created. Then I used port forwarding to access the application locally and test the application's functionality. 
 
-### Milestone 7
+### Milestone 8
 ### AKS Cluster Monitoring 
 
 Monitoring the aks cluster is essential as it allows for me to identify and address issues in real time, optimizing resource usage and making data-driven decisions. 
@@ -399,6 +399,63 @@ I also edited the preset alerts (CPU usage and memory working set percentage ale
 When it comes to responding to these alerts, I would first look at at my resources to see if there are any un used recourses that are not being used and try to clear up space. 
 If this does help, I would have to scale up the infrastructure with more replicas a or adding more memory to the infrastructure. 
 
+### Milestone 8
+### AKS Integration with Azure Key Vault for Secrets Management
+
+#### Azure Key Vault Setup
+Azure Key Vault provides a secure store for secrets. It helps securely store keys, passwords, certificates, and other secrets. 
+
+I created a Azure Key vault by going to the Key Vault homepage and click create. Then I chose the appropriate subscription, resource group, region and gave the ky vault a meaningful name and clicking create. 
+
+The permissions then need to be assigned. This is done in the Access control (IAM) section in the key vault. I then added a "Key Vault Administrator" role assignment to the key vault and made myself the member to that role which ensures secure and efficient management of Key Vault. 
+
+#### Storing secrets in Key Vault
+
+The purpose of the key vault in this application was to store the database credentials. Previously the **server name**, **database name**, **username** and the **password** were stored in the application code but this is poor security. By using the the key vault all these credentials are secure while in the aks cluster. 
+Each credential was created in the secrets section under objects in the key vault. In the secrets section, I used Generate/Import to add each credential giving it a name and entering the value secret.  
+
+#### Integrate AKS with Key Vault
+
+To integrate the aks cluster with the key vault, the first step is to enable the managed identity. A managed identity is a security feature in Azure that eliminates the need for developers to manually manage credentials which simplifies the authentication and authorization processes for applications and services. 
+I enabled a system-assigned managed identity which created directly on specific Azure resources where only the specified resource can use this managed identity to request tokens from Microsoft Entra ID and the identity is automatically deleted when the associated Azure resource is deleted.
+The followiing command enables the this system-assigned identity:
+```
+az aks update --resource-group <resource-group> --name <aks-cluster-name> --enable-managed-identity
+```
+Then I used the following command to get information about the managed identity created for the AKS cluster:
+```
+az aks show --resource-group <resource-group> --name <aks-cluster-name> --query identityProfile
+```
+I took note of the "clientId" and used it in the following command to assign the "Key Vault Secrets Officer" RBAC role to the Managed Identity of an AKS cluster:
+```
+az role assignment create --role "Key Vault Secrets Officer" --assignee <managed-identity-client-id> --scope /subscriptions/{subscription-id}/resourceGroups/{resource-group}/providers/Microsoft.KeyVault/vaults/{key-vault-name}
+```
+ This grants AKS the necessary permissions to interact securely with Azure Key Vault. 
+
+#### Modifications to the application code
+Now that every is set the application can use the vault to hold the database credentials and still be securely used in the application.
+
+I first needed to pip install the "azure-identity" and "azure-keyvault-secrets" libraries. These libraries provide a set of tools for secure authentication and access management within Azure services therefore simplifying the process of integrating identity-related functionalities into your applications, ensuring secure interactions with Azure resources.
+
+In the application code I imported the "ManagedIdentityCredential" from "azure.identity" and "SecretClient" from "azure.keyvault.secrets". 
+After I declared the Vault URI which is the is the unique address used to access and interact with the resources stored within the key vault and is found on the overview page of the key vault.
+Then I set the secret client with the managed identity using the following code:
+```
+key_vault_url = "https://<your-key-vault-name>.vault.azure.net/"
+credential = ManagedIdentityCredential()
+secret_client = SecretClient(vault_url=key_vault_url, credential=credential)
+```
+"key_vault_url" is the Vault URI.
+
+I then accessed the value of each secret using the following code:
+```
+secret = secret_client.get_secret("secret-name").value
+```
+Where "secret-name" is the name of secret in the key vault. 
+
+## Project architecture diagram
+
+![Project architecture diagram Screenshot](screenshots/UML%20diagram%20for%20the%20architecture.png)
 
 ## Getting Started
 

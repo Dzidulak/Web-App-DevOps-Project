@@ -16,18 +16,12 @@ key_vault_url = "https://webapp-aks-kv.vault.azure.net/"
 credential = ManagedIdentityCredential()
 secret_client = SecretClient(vault_url=key_vault_url, credential=credential)
 
-server_secret = secret_client.get_secret("server-name")
-database_secret = secret_client.get_secret("db-name")
-username_secret = secret_client.get_secret("server-username")
-password_secret = secret_client.get_secret("server-passwrd")
-
 # database connection 
-server = server_secret.value
-database = database_secret.value
-username = username_secret.value
-password = password_secret.value 
+server = secret_client.get_secret("server-name").value
+database = secret_client.get_secret("db-name").value
+username= secret_client.get_secret("server-username").value
+password = secret_client.get_secret("server-passwrd").value
 driver= '{ODBC Driver 18 for SQL Server}'
-print(f"ser:{server}, db:{database}, user:{username}, pass:{password}")
 
 # Create the connection string
 connection_string=f'Driver={driver};\
