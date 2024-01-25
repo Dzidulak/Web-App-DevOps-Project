@@ -60,18 +60,16 @@ To run the application, you simply need to run the `app.py` script in this repos
 
 The following milestones show how I created an end-to-end devops pipeline for this application. 
 
-### Milestone 1
+### **Milestone 1**: Version control
 
 #### *Reverted* New Feature (In feature/add-delivery-date branch)
 
 Added a new column to the order list page that displays the delivery date for each order. By adding this new column a new field in the add order page was added so the the user can add the delivery date the the order.
 This feature was updated within the app.py and templates/orders.html files. 
 
-### Milestone 2
+### **Milestone 2**: Containerizing the Web Application
 
-#### Containerizing the Web Application
-
-*Creating Dockerfile*
+#### Creating Dockerfile
 
 There were 7 steps undertaken to to create this Dockerfile. They were:
 1. Creating a file called ```Dockerfile```.
@@ -82,7 +80,7 @@ There were 7 steps undertaken to to create this Dockerfile. They were:
 6. Using ```EXPOSE``` command to expose port 5000 as this is the port the Flask app is on. 
 7. Setting start up command using ```CMD``` command which will run the application by running app.py file when the container starts running. 
 
-*Building Docker Image*
+#### Building Docker Image
 
 This saved Docker file is then used to build a docker image using the command ```docker build -t webapp-devops-project```
 
@@ -93,15 +91,13 @@ This is done using the command:
 
 ```docker tag webapp-devops-project dzidulak/webapp-devops-project:latest``` to tag the image and use  ```docker push``` to push the image to Docker Hub.  
 
-*Docker Image details*
+#### Docker Image details
 
 This Docker Image is available on Docker Hub. It's called ```dzidulak/webapp-devops-project``` and has the "latest" tag.
 
 The image can be used by using the command: ```docker pull dzidulak/webapp-devops-project:latest```
 
-### Milestone 3
-
-#### Defining Networking Services with IaaC(Terraform)
+### **Milestone 3**: Defining Networking Services with IaaC(Terraform)
 
 This is the first step of setting up a an Azure Kubernetes Service (AKS) cluster using IaaC(Terraform).
 
@@ -148,14 +144,12 @@ The resources created in the file were:
 - `networking_resource_group_name` -Name of the networking resources' resource group.
 - `aks_nsg_id` - the ID of the Network Security Group (NSG).
 
-### Milestone 4
-
-#### Defining AKS cluster in Terraform
+### **Milestone 4**: Defining AKS cluster in Terraform
 
 The AKS cluster was defined in the ```aks-cluster-module``` directory and just like to the networking module three files were created.
 The input variables, output variables and the main configuration. 
 
-#### *Setting input variables*
+#### Setting input variables
 
 The input variables used in this module are:
 
@@ -169,7 +163,7 @@ The input variables used in this module are:
 Additionally I added the *output variables* from the *networking module*. This is due to the fact that the networking module establishes 
 the networking resources for the AKS cluster.
 
-#### *Setting main file* 
+#### Setting main file
 
 The only resource defined in the main file configuration file is the AKS cluster (``azurerm_kubernetes_cluster``) which was defined with the variables.
 Within the aks cluster resource definition the following were defined:
@@ -177,7 +171,7 @@ Within the aks cluster resource definition the following were defined:
 - ``default_node_pool`` - Defines the default node pool for the cluster.
 - ``service_principal`` - Provides the authentication details for the AKS cluster
 
-#### *Setting outputs variables* 
+#### Setting outputs variables
 
 5 output variables were set in the output variables file. These variables were:
 
@@ -185,8 +179,7 @@ Within the aks cluster resource definition the following were defined:
 - ``aks_cluster_id`` - ID of the AKS cluster.
 - ``aks_kubeconfig`` - Kubeconfig file for interacting with and managing the AKS cluster using kubectl.
 
-### Milestone 5
-
+### Milestone 5: Creating AKS cluster in Terraform
 
 #### Defining main configuration & Creating a AKS cluster with terraform. 
 
@@ -245,8 +238,7 @@ az aks get-credentials --resource-group <your-resource-group> --name <your-aks-c
 ```
 This will allow you to interact with the aks cluster using kubectl commands. 
 
-### Milestone 6 
-### Kubernetes Deployment to AKS 
+### ** Milestone 6**: Kubernetes Deployment to AKS 
 
 In this section I create a kubernetes manifest file. This file describes the desired state of the the kubernetes object. 
 To start a yaml file named ``application-manifest.yaml``. This file holds the information of how I desire my kubernetes object to look and therefore holds the information for the deployment and the service. 
@@ -295,8 +287,7 @@ There may be point were the team members/internal company users will want access
 
 In a time where I would want to share the application to external users it would be better to use an Ingress using HTTPS in the service manifest as this would be better for handling external web traffic and will be more secure. 
 
-### Milestone 7 
-### CI/CD Pipeline with Azure DevOps
+### **Milestone 7**: CI/CD Pipeline with Azure DevOps
 
 The first step to create a CI/CD pipeline in Azure DevOps is creating a project within Azure DevOps. 
 And then within the "pipelines" tab after the project is created create a "new pipeline" using GitHub as the source control system where your application code is hosted. 
@@ -350,8 +341,7 @@ This task deploys the application from the application manifest file in the repo
 
 With the release pipeline configured, I saved and ran this file to perform the full pipeline. So it builds and pushes the docker image and then deploys the application onto the aks cluster earlier created. To check that this deployment was successful I checked the aks cluster to see the if the pods have been created. Then I used port forwarding to access the application locally and test the application's functionality. 
 
-### Milestone 8
-### AKS Cluster Monitoring 
+### **Milestone 8**: AKS Cluster Monitoring 
 
 Monitoring the aks cluster is essential as it allows for me to identify and address issues in real time, optimizing resource usage and making data-driven decisions. 
 
@@ -431,8 +421,7 @@ I also edited the preset alerts (CPU usage and memory working set percentage ale
 When it comes to responding to these alerts, I would first look at at my resources to see if there are any un used recourses that are not being used and try to clear up space. 
 If this does help, I would have to scale up the infrastructure with more replicas a or adding more memory to the infrastructure. 
 
-### Milestone 8
-### AKS Integration with Azure Key Vault for Secrets Management
+### **Milestone 8**: AKS Integration with Azure Key Vault for Secrets Management
 
 #### Azure Key Vault Setup
 Azure Key Vault provides a secure store for secrets. It helps securely store keys, passwords, certificates, and other secrets. 
