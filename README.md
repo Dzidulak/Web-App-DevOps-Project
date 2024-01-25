@@ -26,6 +26,33 @@ Welcome to the Web App DevOps Project repo! This application allows you to effic
 
 - **Data Validation:** Ensure data accuracy and completeness with required fields, date restrictions, and card number validation.
 
+## Getting Started
+
+### Prerequisites
+
+For the application to successfully run, you need to install the following packages:
+
+- flask (version 2.2.2)
+- pyodbc (version 4.0.39)
+- SQLAlchemy (version 2.0.21)
+- werkzeug (version 2.2.3)
+
+### Usage
+
+To run the application, you simply need to run the `app.py` script in this repository. Once the application starts you should be able to access it locally at `http://127.0.0.1:5000`. Here you will be meet with the following two pages:
+
+1. **Order List Page:** Navigate to the "Order List" page to view all existing orders. Use the pagination controls to navigate between pages.
+
+2. **Add New Order Page:** Click on the "Add New Order" tab to access the order form. Complete all required fields and ensure that your entries meet the specified criteria.
+
+## Technology Stack
+
+- **Backend:** Flask is used to build the backend of the application, handling routing, data processing, and interactions with the database.
+
+- **Frontend:** The user interface is designed using HTML, CSS, and JavaScript to ensure a smooth and intuitive user experience.
+
+- **Database:** The application employs an Azure SQL Database as its database system to store order-related data.
+
 ## Developments
 
 ### Milestone 1
@@ -456,33 +483,6 @@ Where "secret-name" is the name of secret in the key vault.
 ## Project architecture diagram
 
 ![Project architecture diagram Screenshot](screenshots/UML%20diagram%20for%20the%20architecture.png)
-
-## Getting Started
-
-### Prerequisites
-
-For the application to successfully run, you need to install the following packages:
-
-- flask (version 2.2.2)
-- pyodbc (version 4.0.39)
-- SQLAlchemy (version 2.0.21)
-- werkzeug (version 2.2.3)
-
-### Usage
-
-To run the application, you simply need to run the `app.py` script in this repository. Once the application starts you should be able to access it locally at `http://127.0.0.1:5000`. Here you will be meet with the following two pages:
-
-1. **Order List Page:** Navigate to the "Order List" page to view all existing orders. Use the pagination controls to navigate between pages.
-
-2. **Add New Order Page:** Click on the "Add New Order" tab to access the order form. Complete all required fields and ensure that your entries meet the specified criteria.
-
-## Technology Stack
-
-- **Backend:** Flask is used to build the backend of the application, handling routing, data processing, and interactions with the database.
-
-- **Frontend:** The user interface is designed using HTML, CSS, and JavaScript to ensure a smooth and intuitive user experience.
-
-- **Database:** The application employs an Azure SQL Database as its database system to store order-related data.
 
 ## Contributors 
 
