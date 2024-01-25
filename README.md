@@ -179,7 +179,7 @@ Within the aks cluster resource definition the following were defined:
 - ``aks_cluster_id`` - ID of the AKS cluster.
 - ``aks_kubeconfig`` - Kubeconfig file for interacting with and managing the AKS cluster using kubectl.
 
-### Milestone 5: Creating AKS cluster in Terraform
+### **Milestone 5**: Creating AKS cluster in Terraform
 
 #### Defining main configuration & Creating a AKS cluster with terraform. 
 
@@ -238,7 +238,7 @@ az aks get-credentials --resource-group <your-resource-group> --name <your-aks-c
 ```
 This will allow you to interact with the aks cluster using kubectl commands. 
 
-### ** Milestone 6**: Kubernetes Deployment to AKS 
+### **Milestone 6**: Kubernetes Deployment to AKS 
 
 In this section I create a kubernetes manifest file. This file describes the desired state of the the kubernetes object. 
 To start a yaml file named ``application-manifest.yaml``. This file holds the information of how I desire my kubernetes object to look and therefore holds the information for the deployment and the service. 
@@ -421,7 +421,7 @@ I also edited the preset alerts (CPU usage and memory working set percentage ale
 When it comes to responding to these alerts, I would first look at at my resources to see if there are any un used recourses that are not being used and try to clear up space. 
 If this does help, I would have to scale up the infrastructure with more replicas a or adding more memory to the infrastructure. 
 
-### **Milestone 8**: AKS Integration with Azure Key Vault for Secrets Management
+### **Milestone 9**: AKS Integration with Azure Key Vault for Secrets Management
 
 #### Azure Key Vault Setup
 Azure Key Vault provides a secure store for secrets. It helps securely store keys, passwords, certificates, and other secrets. 
