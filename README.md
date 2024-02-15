@@ -275,34 +275,40 @@ spec:
   ...
 ```
 
-#### Deployment
+<details> 
+  <summary>Deployment definition</summary>
+  
+  To start ``apiVersion:``  was set to app/v1 which just shows this as the first version of the deployment. Then to specify that I'm defining a deployment, I make sure the ``kind`` field is set to *"Deployment"*. Then within the ``metadata`` fields i name the deployment "flask-app-deployment" and this acts as a central reference for managing the containerized application. 
+  The ``spec:`` field holds teh rest of the design of the deployment and the following setting are defined in this field:
+  - ``replicas: 2`` - This specifies that the application should concurrently run on two replicas within the AKS cluster, allowing for scalability and high availability.
+  - Adding a ``selector`` field and using the ``matchLables`` section I defined the app the with label ``app: flask-devops-webapp`` which is used as a unique identifier and allows Kubernetes to identify which pods the Deployment should manage.
+  - This label is also used in the next metadata section within the template field (pod template) and this is is used to mark the pods created by the Deployment, establishing a clear connection between the pods and the application being managed.
+  - Defining the container being used. I simply defined the docker image that is holding the application which is on Docker Hub and exposing port 5000 for communication within the AKS cluster.
+  - The final step was setting the deployment strategy. The chosen strategy was Rolling Updates which facilitating seamless application updates and makes minimizes downtime for users.
+</details> 
 
-To start ``apiVersion:``  was set to app/v1 which just shows this as the first version of the deployment. Then to specify that I'm defining a deployment, I make sure the ``kind`` field is set to *"Deployment"*. Then within the ``metadata`` fields i name the deployment "flask-app-deployment" and this acts as a central reference for managing the containerized application. 
-The ``spec:`` field holds teh rest of the design of the deployment and the following setting are defined in this field:
-- ``replicas: 2`` - This specifies that the application should concurrently run on two replicas within the AKS cluster, allowing for scalability and high availability.
-- Adding a ``selector`` field and using the ``matchLables`` section I defined the app the with label ``app: flask-devops-webapp`` which is used as a unique identifier and allows Kubernetes to identify which pods the Deployment should manage.
-- This label is also used in the next metadata section within the template field (pod template) and this is is used to mark the pods created by the Deployment, establishing a clear connection between the pods and the application being managed.
-- Defining the container being used. I simply defined the docker image that is holding the application which is on Docker Hub and exposing port 5000 for communication within the AKS cluster.
-- The final step was setting the deployment strategy. The chosen strategy was Rolling Updates which facilitating seamless application updates and makes minimizes downtime for users.
+<details> 
+  <summary>Service definition</summary>
+  
+  With the deployment manifest configured, I configured the service manifest in the same file facilitate internal communication within the AKS cluster using the ``---`` command.
+  The steps taken to configure this were:
+  - Specifying the ``kind:`` as *"Service"* and naming the service "flask-app-service".
+  - The selector label is set to the same label used in the deployment manifest ("flask-devops-webapp") which guarantees that the traffic is efficiently directed to the appropriate pods, maintaining seamless internal communication within the AKS cluster.
+  - Configured the service to use the TCP protocol on port 80 for internal communications and the ``targetPort`` is set to 5000 which is the same as the port exposed by the container in the deployment manifest. 
+  - Finally, I set the service type to "ClusterIP", designating it as an internal service within the AKS cluster. 
+</details> 
 
-#### Service
+<details> 
+<summary>Testing & Validation</summary>
 
-With the deployment manifest configured, I configured the service manifest in the same file facilitate internal communication within the AKS cluster using the ``---`` command.
-The steps taken to configure this were:
-- Specifying the ``kind:`` as *"Service"* and naming the service "flask-app-service".
-- The selector label is set to the same label used in the deployment manifest ("flask-devops-webapp") which guarantees that the traffic is efficiently directed to the appropriate pods, maintaining seamless internal communication within the AKS cluster.
-- Configured the service to use the TCP protocol on port 80 for internal communications and the ``targetPort`` is set to 5000 which is the same as the port exposed by the container in the deployment manifest. 
-- Finally, I set the service type to "ClusterIP", designating it as an internal service within the AKS cluster. 
-
-#### Testing & Validation
-
-This application is an internal tool designed for the company's employees and is not intended for external users and given its internal nature, I assessed the now deployed deployment by performing port forwarding to a local machine using the ```kubectl port-forward <pod-name> 5000:5000``` command. 
-
-To test and validate the application I accessed the application locally using the the url: ``http://127.0.0.1:5000`` and I checked every feature of the application and made sure it was everything was working as expected. The features tested were:
-- The order list is displaying the information as expected on each page.
-- Switching between the order list and the add order page making sure that there are no problems there. 
-- Adding order through the add order page and making sure they are shown on the order list page. 
-- Adding different values to make sure invalid details are not inputted.
+  This application is an internal tool designed for the company's employees and is not intended for external users and given its internal nature, I assessed the now deployed deployment by performing port forwarding to a local machine using the ```kubectl port-forward <pod-name> 5000:5000``` command. 
+  
+  To test and validate the application I accessed the application locally using the the url: ``http://127.0.0.1:5000`` and I checked every feature of the application and made sure it was everything was working as expected. The features tested were:
+  - The order list is displaying the information as expected on each page.
+  - Switching between the order list and the add order page making sure that there are no problems there. 
+  - Adding order through the add order page and making sure they are shown on the order list page. 
+  - Adding different values to make sure invalid details are not inputted.
+</details> 
 
 #### Possible distribution plans
 
@@ -320,49 +326,53 @@ After configuring the git hub connection I chose this github repo which holds al
 
 After choosing the repository it was time to start the creation of the pipeline .yml file. In Azure Devops there are templates that can be used to start the pipeline build. I used the Starter pipeline template to start and edited it to my liking. 
 
-#### Build pipeline creation 
+<details> 
+<summary>Build pipeline creation</summary>
+  
+  Before editing anything I needed to create a service connection between Azure DevOps and my Docker Hub account which holds the application image. 
+  This allows for seamless integration of the CI/CD pipeline with the Docker Hub container registry. 
+  
+  This was done by creating the access token on Docker Hub and then on Azure Devops add a new "Docker Registry" service connection using the my docker hub username and the created access token. 
+  Now that the service connection is created, the build pipeline can create the docker image and push the image to Docker Hub seamlessly. 
+  
+  Now back in the azure-pipeline.yml file, I added a task in the steps field to build and push the application to Docker Hub. This is easy to do using the add task feature in Azure Devops and this helps tyo add the following code to the file.
+  ```
+  - task: Docker@2
+    inputs:
+      containerRegistry: 'Docker Hub'
+      repository: 'dzidulak/webapp-devops-project'
+      command: 'buildAndPush'
+      Dockerfile: '**/Dockerfile'
+      tags: 'latest'
+  ```
+  And this code basically uses the "buildAndPush" command to build and push a docker image, from the Dockerfile at the directory supplies in the repository used in for the pipeline, to Github.  
+  
+  To check this was created fine, I saved and ran the pipeline. After seeing that it ran smoothly, I checked Docker Hub to see when the last push was made. 
+</details> 
 
-Before editing anything I needed to create a service connection between Azure DevOps and my Docker Hub account which holds the application image. 
-This allows for seamless integration of the CI/CD pipeline with the Docker Hub container registry. 
-
-This was done by creating the access token on Docker Hub and then on Azure Devops add a new "Docker Registry" service connection using the my docker hub username and the created access token. 
-Now that the service connection is created, the build pipeline can create the docker image and push the image to Docker Hub seamlessly. 
-
-Now back in the azure-pipeline.yml file, I added a task in the steps field to build and push the application to Docker Hub. This is easy to do using the add task feature in Azure Devops and this helps tyo add the following code to the file.
-```
-- task: Docker@2
-  inputs:
-    containerRegistry: 'Docker Hub'
-    repository: 'dzidulak/webapp-devops-project'
-    command: 'buildAndPush'
-    Dockerfile: '**/Dockerfile'
-    tags: 'latest'
-```
-And this code basically uses the "buildAndPush" command to build and push a docker image, from the Dockerfile at the directory supplies in the repository used in for the pipeline, to Github.  
-
-To check this was created fine, I saved and ran the pipeline. After seeing that it ran smoothly, I checked Docker Hub to see when the last push was made. 
-
-#### Release pipeline creation 
-
-Now that the build pipeline is sorted, its time to create the release pipeline. 
-
-A service connection is also needed for the release pipeline to help establish a secure link between the CI/CD pipeline and the AKS cluster. This will enable seamless deployments and effective management. 
-The Kubernetes service connection was created in a settings using my azure subscription as it is an AKS cluster. 
-
-With with the service connection set, I then went back into the pipeline.yaml file to configure the release pipeline by adding "Deploy to Kubernetes" task to deploy the application onto the aks cluster. I then added the following task:
-```
-- task: KubernetesManifest@1
-  inputs:
-    action: 'deploy'
-    connectionType: 'azureResourceManager'
-    azureSubscriptionConnection: <my-azure-subscription>
-    azureResourceGroup: 'networking-rg'
-    kubernetesCluster: 'terraform-aks-cluster'
-    manifests: 'application-manifest.yaml'
-```
-This task deploys the application from the application manifest file in the repository to my aks cluster with the name of the cluster and the resource group specified. The connection type is also "azureResourceManager" as an aks cluster is a azure resource. 
-
-With the release pipeline configured, I saved and ran this file to perform the full pipeline. So it builds and pushes the docker image and then deploys the application onto the aks cluster earlier created. To check that this deployment was successful I checked the aks cluster to see the if the pods have been created. Then I used port forwarding to access the application locally and test the application's functionality. 
+<details> 
+  <summary>Release pipeline creation</summary>
+  
+  Now that the build pipeline is sorted, its time to create the release pipeline. 
+  
+  A service connection is also needed for the release pipeline to help establish a secure link between the CI/CD pipeline and the AKS cluster. This will enable seamless deployments and effective management. 
+  The Kubernetes service connection was created in a settings using my azure subscription as it is an AKS cluster. 
+  
+  With with the service connection set, I then went back into the pipeline.yaml file to configure the release pipeline by adding "Deploy to Kubernetes" task to deploy the application onto the aks cluster. I then added the following task:
+  ```
+  - task: KubernetesManifest@1
+    inputs:
+      action: 'deploy'
+      connectionType: 'azureResourceManager'
+      azureSubscriptionConnection: <my-azure-subscription>
+      azureResourceGroup: 'networking-rg'
+      kubernetesCluster: 'terraform-aks-cluster'
+      manifests: 'application-manifest.yaml'
+  ```
+  This task deploys the application from the application manifest file in the repository to my aks cluster with the name of the cluster and the resource group specified. The connection type is also "azureResourceManager" as an aks cluster is a azure resource. 
+  
+  With the release pipeline configured, I saved and ran this file to perform the full pipeline. So it builds and pushes the docker image and then deploys the application onto the aks cluster earlier created. To check that this deployment was successful I checked the aks cluster to see the if the pods have been created. Then I used port forwarding to access the application locally and test the application's functionality. 
+</details> 
 
 ### **Milestone 8**: AKS Cluster Monitoring 
 
