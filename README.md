@@ -69,33 +69,41 @@ This feature was updated within the app.py and templates/orders.html files.
 
 ### **Milestone 2**: Containerizing the Web Application
 
-#### Creating Dockerfile
+Docker was utilized to containerize the application for seamless deployment within a Kubernetes cluster. Docker offers significant advantages in this context by providing an OS-agnostic solution for building and deploying applications.
 
-There were 7 steps undertaken to to create this Dockerfile. They were:
-1. Creating a file called ```Dockerfile```.
-2. Setting the parent image. In this case as the application is using flask the parent/base image is an official Python runtime (python:3.8-slim) using the ```FROM``` command.
-3. Setting the working directory using the ```WORKDIR``` command.
-4. Copying the application files into the container's working directory set in step using the ```COPY``` command. 
-5. Installing dependencies for the container. Using the ```RUN``` command and installing the system dependencies, ODBC driver (for azure sql database), pip, setuptools and the dependencies in the requirements file.
-6. Using ```EXPOSE``` command to expose port 5000 as this is the port the Flask app is on. 
-7. Setting start up command using ```CMD``` command which will run the application by running app.py file when the container starts running. 
+<details> 
+  <summary>Creating Dockerfile</summary> 
 
-#### Building Docker Image
+  There were 7 steps undertaken to to create this Dockerfile. They were:
+  1. Creating a file called ```Dockerfile```.
+  2. Setting the parent image. In this case as the application is using flask the parent/base image is an official Python runtime (python:3.8-slim) using the ```FROM``` command.
+  3. Setting the working directory using the ```WORKDIR``` command.
+  4. Copying the application files into the container's working directory set in step using the ```COPY``` command. 
+  5. Installing dependencies for the container. Using the ```RUN``` command and installing the system dependencies, ODBC driver (for azure sql database), pip, setuptools and the dependencies in the requirements file.
+  6. Using ```EXPOSE``` command to expose port 5000 as this is the port the Flask app is on. 
+  7. Setting start up command using ```CMD``` command which will run the application by running app.py file when the container starts running. 
+</details> 
 
-This saved Docker file is then used to build a docker image using the command ```docker build -t webapp-devops-project```
+<details> 
+  <summary>Building Docker Image</summary>
 
-To check the containerized application is working, it was run locally using the command: ```docker run -p 5000:5000 webapp-devops-project```
+  This saved Docker file is then used to build a docker image using the command ```docker build -t webapp-devops-project```
 
-With the image running locally it is fine then tag and push the image to Docker Hub. 
-This is done using the command: 
+  To check the containerized application is working, it was run locally using the command: ```docker run -p 5000:5000 webapp-devops-project```
 
-```docker tag webapp-devops-project dzidulak/webapp-devops-project:latest``` to tag the image and use  ```docker push``` to push the image to Docker Hub.  
+  With the image running locally it is fine then tag and push the image to Docker Hub. 
+  This is done using the command: 
 
-#### Docker Image details
+  ```docker tag webapp-devops-project dzidulak/webapp-devops-project:latest``` to tag the image and use  ```docker push``` to push the image to Docker Hub.  
+</details> 
 
-This Docker Image is available on Docker Hub. It's called ```dzidulak/webapp-devops-project``` and has the "latest" tag.
+<details> 
+  <summary>Docker Image details</summary>
 
-The image can be used by using the command: ```docker pull dzidulak/webapp-devops-project:latest```
+  This Docker Image is available on Docker Hub. It's called ```dzidulak/webapp-devops-project``` and has the "latest" tag.
+
+  The image can be used by using the command: ```docker pull dzidulak/webapp-devops-project:latest```
+</details> 
 
 ### **Milestone 3**: Defining Networking Services with IaaC(Terraform)
 
@@ -109,75 +117,87 @@ The section focusses on the networking module. To start off 3 files are created:
 - ```variables.tf``` - Held the input variables
 - ```outputs.tf``` - Held all the output variables
 
-#### *Setting input variables*
+<details> 
+  <summary>Setting input variables</summary>
 
-3 input variables were set in the variables file. These are variables that were used throughout this module. These variables were:
-- ```resource_group_name``` - Name of the Azure Resource Group where the networking resources will be deployed in.
-- ```location``` - The Azure region where the networking resources will be deployed to.
-- ```vnet_address_space``` - The address space for the Virtual Network (VNet).
+  3 input variables were set in the variables file. These are variables that were used throughout this module. These variables were:
+  - ```resource_group_name``` - Name of the Azure Resource Group where the networking resources will be deployed in.
+  - ```location``` - The Azure region where the networking resources will be deployed to.
+  - ```vnet_address_space``` - The address space for the Virtual Network (VNet).
+</details> 
 
-#### *Setting main file* 
+<details> 
+  <summary>Setting main file</summary> 
 
-The resources created in the file were:
-- ```azurerm_resource_group```  - The Azure Resource Group.
-- ``azurerm_virtual_network`` - The Azure Virtual Network(VNet).
-- ``azurerm_subnet`` - subdivision of a Virtual Network and is used to group resources logically
-    
-    There were 2 subnets created:
-    - `control_plane_subnet`
-    - `worker_node_subnet`
+  The resources created in the file were:
+  - ```azurerm_resource_group```  - The Azure Resource Group.
+  - ``azurerm_virtual_network`` - The Azure Virtual Network(VNet).
+  - ``azurerm_subnet`` - subdivision of a Virtual Network and is used to group resources logically
+      
+      There were 2 subnets created:
+      - `control_plane_subnet`
+      - `worker_node_subnet`
 
-- `network_security_group`(NSG) - Controls network traffic to and from Azure resources.
-- `network_security_rule` - Rules used within the NSG to control traffic
+  - `network_security_group`(NSG) - Controls network traffic to and from Azure resources.
+  - `network_security_rule` - Rules used within the NSG to control traffic
 
-    2 rules were created:
-    - `kube-apiserver-rule` - This allows traffic to the kube-apiserver from my public IP using port 443.
-    - `ssh` - allow inbound SSH traffic from my public IP using port 22.
+      2 rules were created:
+      - `kube-apiserver-rule` - This allows traffic to the kube-apiserver from my public IP using port 443.
+      - `ssh` - allow inbound SSH traffic from my public IP using port 22.
+</details> 
 
-#### *Setting outputs variables* 
+<details> 
+  <summary>Setting outputs variables</summary>
 
-5 output variables were set in the output variables file. These are variables that are used in other modules. These variables were:
+  5 output variables were set in the output variables file. These are variables that are used in other modules. These variables were:
 
-- `vnet_id` - The ID of the created VNet.
-- `control_plane_subnet_id` - The ID of the control plane subnet within the VNet.
-- `worker_node_subnet_id` - The ID of the worker node subnet within the VNet.
-- `networking_resource_group_name` -Name of the networking resources' resource group.
-- `aks_nsg_id` - the ID of the Network Security Group (NSG).
+  - `vnet_id` - The ID of the created VNet.
+  - `control_plane_subnet_id` - The ID of the control plane subnet within the VNet.
+  - `worker_node_subnet_id` - The ID of the worker node subnet within the VNet.
+  - `networking_resource_group_name` -Name of the networking resources' resource group.
+  - `aks_nsg_id` - the ID of the Network Security Group (NSG).
+</details> 
 
 ### **Milestone 4**: Defining AKS cluster in Terraform
 
 The AKS cluster was defined in the ```aks-cluster-module``` directory and just like to the networking module three files were created.
 The input variables, output variables and the main configuration. 
 
-#### Setting input variables
+<details> 
+  <summary>Setting input variables</summary>
 
-The input variables used in this module are:
+  The input variables used in this module are:
 
-- ``aks_cluster_name`` - Represents the name of the AKS cluster you wish to create.
-- ``cluster_location`` - Specifies the Azure region where the AKS cluster will be deployed to.
-- ``dns_prefix`` - Defines the DNS prefix of cluster.
-- ``kubernetes_version`` - Specifies which Kubernetes version the cluster will use.
-- ``service_principal_client_id`` - Provides the Client ID for the service principal associated with the cluster.
-- ``service_principal_secret`` - Supplies the Client Secret for the service principal.
+  - ``aks_cluster_name`` - Represents the name of the AKS cluster you wish to create.
+  - ``cluster_location`` - Specifies the Azure region where the AKS cluster will be deployed to.
+  - ``dns_prefix`` - Defines the DNS prefix of cluster.
+  - ``kubernetes_version`` - Specifies which Kubernetes version the cluster will use.
+  - ``service_principal_client_id`` - Provides the Client ID for the service principal associated with the cluster.
+  - ``service_principal_secret`` - Supplies the Client Secret for the service principal.
 
-Additionally I added the *output variables* from the *networking module*. This is due to the fact that the networking module establishes 
-the networking resources for the AKS cluster.
+  Additionally I added the *output variables* from the *networking module*. This is due to the fact that the networking module establishes 
+  the networking resources for the AKS cluster.
+</details> 
 
-#### Setting main file
+<details> 
+  <summary>Setting main file</summary>
 
-The only resource defined in the main file configuration file is the AKS cluster (``azurerm_kubernetes_cluster``) which was defined with the variables.
-Within the aks cluster resource definition the following were defined:
+  The only resource defined in the main file configuration file is the AKS cluster (``azurerm_kubernetes_cluster``) which was defined with the variables.
+  Within the aks cluster resource definition the following were defined:
 
-- ``default_node_pool`` - Defines the default node pool for the cluster.
-- ``service_principal`` - Provides the authentication details for the AKS cluster
+  - ``default_node_pool`` - Defines the default node pool for the cluster.
+  - ``service_principal`` - Provides the authentication details for the AKS cluster
+</details> 
 
-#### Setting outputs variables
+<details> 
+  <summary>Setting outputs variables</summary>
 
-5 output variables were set in the output variables file. These variables were:
+  5 output variables were set in the output variables file. These variables were:
 
-- ``aks_cluster_name`` - Name of the AKS cluster.
-- ``aks_cluster_id`` - ID of the AKS cluster.
-- ``aks_kubeconfig`` - Kubeconfig file for interacting with and managing the AKS cluster using kubectl.
+  - ``aks_cluster_name`` - Name of the AKS cluster.
+  - ``aks_cluster_id`` - ID of the AKS cluster.
+  - ``aks_kubeconfig`` - Kubeconfig file for interacting with and managing the AKS cluster using kubectl.
+</details> 
 
 ### **Milestone 5**: Creating AKS cluster in Terraform
 
@@ -185,58 +205,61 @@ Within the aks cluster resource definition the following were defined:
 
 The main configuration was created in the ``aks-terraform`` directory.
 
-#### *Setting input variables*
+<details> 
+  <summary>Setting input variables</summary>
 
-##### Getting credentials
+  #### Getting credentials
 
-In the main configuration 4 azure account details are need:``client_id``, ``client_secret``, ``subscription_id`` and ``tenant_id``.
-These credentials are obtained through the Azure CLI. First I obtained the the subscription ID and this is obtained by to login to Azure CLI using 
-```
-az login
-``` 
-then using the 
-```
-az account list --output table
-``` 
-which will show the subscription ID. 
+  In the main configuration 4 azure account details are need:``client_id``, ``client_secret``, ``subscription_id`` and ``tenant_id``.
+  These credentials are obtained through the Azure CLI. First I obtained the the subscription ID and this is obtained by to login to Azure CLI using 
+  ```
+  az login
+  ``` 
+  then using the 
+  ```
+  az account list --output table
+  ``` 
+  which will show the subscription ID. 
 
-The next step was to create a service principal which is an identity that helps apps/automated solutions like this to interact with azure resources. To create a service principal the following command is used:
+  The next step was to create a service principal which is an identity that helps apps/automated solutions like this to interact with azure resources. To create a service principal the following command is used:
 
-```
-az ad sp create-for-rbac --name {service-principal-name} --role contributor --scopes subscriptions/{your-subscription-id}
-```
+  ```
+  az ad sp create-for-rbac --name {service-principal-name} --role contributor --scopes subscriptions/{your-subscription-id}
+  ```
 
-Where ``{service-principal-name}`` is the name chosen for the service principal and ``{your-subscription-id}``. This command will create the service principal and will reveal the ``client_id``, ``client_secret``, ``subscription_id`` and ``tenant_id`` in a JSON in the CLI.
+  Where ``{service-principal-name}`` is the name chosen for the service principal and ``{your-subscription-id}``. This command will create the service principal and will reveal the ``client_id``, ``client_secret``, ``subscription_id`` and ``tenant_id`` in a JSON in the CLI.
+  These credentials are sensitive so they were set as environment variables  
 
-As the ``client_id`` and ``client_secret`` are sensitive data they were set as environment variables  
+  #### Input variable definition
 
-##### Input variable definition
+  The ``client_id``, ``client_secret``, ``subscription_id`` and ``tenant_id`` were defined in the input variables and "sensitive" field was set to "true" for all variables. 
+</details> 
 
-Only the the the ``client_id`` and ``client_secret`` were defined in the input variables and "sensitive" field was set to "true" for both variables. 
+<details> 
+  <summary>Setting main configuration</summary>
+  - provider
 
-#### *Setting main configuration*
-- provider
+  The first step in the main configuration file is to set the providers fields. The first terraform field sets the configuration to *"azurerm"* which is used for Azure resources. Then set the provider which is where the service principal details obtained above are defined.
 
-The first step in the main configuration file is to set the providers fields. The first terraform field sets the configuration to *"azurerm"* which is used for Azure resources. Then set the provider which is where the service principal details obtained above are defined.
+  Next is setting up the 2 modules that have already been defined (the networking module & aks the cluster module) both modules were set up using the syntax below:
+  ```
+  module "<module-name>" {
+    source = "<directory-of-module>"
 
-Next is setting up the 2 modules that have already been defined (the networking module & aks the cluster module) both modules were set up using the syntax below:
-```
-module "<module-name>" {
-  source = "<directory-of-module>"
+    # Input variables for the networking module
+    ...
+    ...
+  }
+  ```
+  As shown above the module requires the source of the module defined, then the input variable for those modules defined. 
 
-  # Input variables for the networking module
-  ...
-  ...
-}
-```
-As shown above the module requires the source of the module defined, then the input variable for those modules defined. 
-
-##### accessing aks cluster.
-After deploying the aks cluster, To access it you can use the command below which will fetch the kubeconfig and automatically merge it into your local ~/.kube/config file, which is the default location for kubeconfig. 
-```
-az aks get-credentials --resource-group <your-resource-group> --name <your-aks-cluster-name>
-```
-This will allow you to interact with the aks cluster using kubectl commands. 
+  #### Accessing aks cluster.
+  After deploying the aks cluster, To access it you can use the command below which will fetch the kubeconfig and automatically merge it into your local ~/.kube/config file, which is the default location for kubeconfig. 
+  ```
+  az aks get-credentials --resource-group <your-resource-group> --name <your-aks-cluster-name>
+  ```
+  This will allow you to interact with the aks cluster using kubectl commands. 
+</details> 
 
 ### **Milestone 6**: Kubernetes Deployment to AKS 
 

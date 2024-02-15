@@ -10,7 +10,15 @@ variable "client_secret" {
   sensitive = true
 }
 
+variable "subscription_id" {
+  description = "Azure account subrciption ID"
+  type = string
+  sensitive = true
+}
 
-
-  
+variable "tenant_id" {
+  description = "Azure account tenant ID"
+  type = string
+  sensitive = true
+} 
   
